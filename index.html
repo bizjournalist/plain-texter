@@ -5,96 +5,339 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plain Text Converter</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            padding: 20px;
         }
+
         .container {
             width: 100%;
-            max-width: 800px;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            text-align: center;
+            max-width: 900px;
+            background: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
+
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: #2c3e50;
+            padding: 24px 32px;
+            color: white;
+            border-bottom: 3px solid #34495e;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .content {
+            padding: 32px;
+        }
+
+        .textarea-wrapper {
+            position: relative;
             margin-bottom: 20px;
         }
-        h1 {
-            color: #444444;
-            margin: 0;
+
+        .textarea-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
         textarea {
             width: 100%;
-            height: 150px;
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            resize: none;
-            box-sizing: border-box;
+            height: 180px;
+            padding: 14px;
+            border: 1px solid #d0d0d0;
+            border-radius: 3px;
+            font-size: 14px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            line-height: 1.5;
+            resize: vertical;
+            transition: all 0.15s ease;
         }
+
+        textarea:focus {
+            outline: none;
+            border-color: #2c3e50;
+            box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+        }
+
+        #inputText {
+            background: #ffffff;
+        }
+
         #plainText {
-            background-color: #e9ecef;
+            background: #fafafa;
+            cursor: pointer;
+            position: relative;
         }
+
+        #plainText:hover {
+            border-color: #2c3e50;
+            background: #f0f0f0;
+        }
+
+        #plainText::after {
+            content: 'Click to copy';
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 11px;
+            color: #666;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 2px;
+            border: 1px solid #ddd;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            pointer-events: none;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        }
+
+        #plainText:hover::after {
+            opacity: 1;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
         button {
             padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #444444;
-            border: none;
-            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+            background: #e8e8e8;
+            border: 1px solid #ccc;
+            border-radius: 3px;
             cursor: pointer;
-            transition: background-color 0.3s;
-            margin: 10px 0;
+            transition: all 0.15s ease;
         }
+
         button:hover {
-            background-color: #45a049;
+            background: #d8d8d8;
+            border-color: #aaa;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #2c3e50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 3px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #27ae60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Character count */
+        .char-count {
+            font-size: 12px;
+            color: #999;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px 24px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            .content {
+                padding: 24px;
+            }
+
+            textarea {
+                height: 150px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Paste text to convert to plain text</h1>
-            <button onclick="clearText()">Clear text</button>
+            <h1>Plain Text Converter</h1>
+            <div class="subtitle">Remove formatting, clean text instantly</div>
         </div>
-        <textarea id="inputText" placeholder="Paste your text here..."></textarea>
-        <textarea id="plainText" placeholder="Plain text will appear here..." readonly></textarea>
-        <button onclick="copyToClipboard()">Copy to clipboard</button>
+
+        <div class="content">
+            <div class="textarea-wrapper">
+                <label class="textarea-label">Input</label>
+                <textarea id="inputText" placeholder="Paste your formatted text here..."></textarea>
+                <div class="char-count" id="inputCount">0 characters</div>
+            </div>
+
+            <div class="textarea-wrapper">
+                <label class="textarea-label">Output (Click to Copy)</label>
+                <textarea id="plainText" placeholder="Plain text will appear here..." readonly></textarea>
+                <div class="char-count" id="outputCount">0 characters</div>
+            </div>
+
+            <div class="button-group">
+                <button onclick="clearText()">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">✓</div>
+        <div class="toast-message">Copied to clipboard</div>
     </div>
 
     <script>
-        document.getElementById('inputText').addEventListener('input', function() {
-            let inputText = this.value;
-            inputText = inputText.replace(/<\/?[^>]+(>|$)/g, ""); // Remove HTML tags
-            inputText = inputText.replace(/\n\s*\n/g, '\n'); // Remove double line breaks
-            document.getElementById('plainText').value = inputText;
+        const inputText = document.getElementById('inputText');
+        const plainText = document.getElementById('plainText');
+        const inputCount = document.getElementById('inputCount');
+        const outputCount = document.getElementById('outputCount');
+        const toast = document.getElementById('toast');
+
+        // Convert text on input
+        inputText.addEventListener('input', function() {
+            let text = this.value;
+            
+            // Remove HTML tags
+            text = text.replace(/<\/?[^>]+(>|$)/g, "");
+            
+            // Remove double line breaks
+            text = text.replace(/\n\s*\n\s*\n/g, '\n\n');
+            
+            // Update output
+            plainText.value = text;
+            
+            // Update character counts
+            updateCharCounts();
+            
+            // Auto-select output if there's content
+            if (text.trim().length > 0) {
+                plainText.focus();
+                plainText.select();
+            }
         });
 
-        function clearText() {
-            document.getElementById('inputText').value = '';
-            document.getElementById('plainText').value = '';
+        // Click to copy functionality
+        plainText.addEventListener('click', async function() {
+            if (this.value.trim().length === 0) return;
+            
+            try {
+                await navigator.clipboard.writeText(this.value);
+                showToast();
+                
+                // Select the text for visual feedback
+                this.select();
+            } catch (err) {
+                // Fallback for older browsers
+                this.select();
+                document.execCommand('copy');
+                showToast();
+            }
+        });
+
+        // Auto-select on focus
+        plainText.addEventListener('focus', function() {
+            if (this.value.trim().length > 0) {
+                this.select();
+            }
+        });
+
+        // Show toast notification
+        function showToast() {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
         }
 
-        function copyToClipboard() {
-            const plainText = document.getElementById('plainText');
-            plainText.select();
-            document.execCommand('copy');
-            alert('Plain text copied to clipboard!');
+        // Clear all text
+        function clearText() {
+            inputText.value = '';
+            plainText.value = '';
+            updateCharCounts();
+            inputText.focus();
         }
+
+        // Update character counts
+        function updateCharCounts() {
+            inputCount.textContent = `${inputText.value.length} characters`;
+            outputCount.textContent = `${plainText.value.length} characters`;
+        }
+
+        // Keyboard shortcut: Ctrl/Cmd + K to clear
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                clearText();
+            }
+        });
+
+        // Initialize
+        updateCharCounts();
+        inputText.focus();
     </script>
 </body>
 </html>
