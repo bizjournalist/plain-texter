@@ -36,17 +36,40 @@
             padding: 24px 32px;
             color: white;
             border-bottom: 3px solid #34495e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        h1 {
+        .header-text h1 {
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 4px;
         }
 
-        .subtitle {
+        .header-text .subtitle {
             font-size: 13px;
             opacity: 0.85;
+        }
+
+        .header-button {
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #2c3e50;
+            background: #ffffff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .header-button:hover {
+            background: #e8e8e8;
+        }
+
+        .header-button:active {
+            transform: translateY(1px);
         }
 
         .content {
@@ -123,33 +146,6 @@
             opacity: 1;
         }
 
-        .button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #555;
-            background: #e8e8e8;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-
-        button:hover {
-            background: #d8d8d8;
-            border-color: #aaa;
-        }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
         /* Toast notification */
         .toast {
             position: fixed;
@@ -191,12 +187,21 @@
             font-weight: 500;
         }
 
-        /* Character count */
-        .char-count {
+        /* Word and character count */
+        .text-stats {
             font-size: 12px;
             color: #999;
             text-align: right;
             margin-top: 4px;
+        }
+
+        .text-stats .word-count {
+            color: #666;
+        }
+
+        .text-stats .separator {
+            margin: 0 6px;
+            color: #ccc;
         }
 
         @media (max-width: 768px) {
@@ -204,7 +209,7 @@
                 padding: 20px 24px;
             }
 
-            h1 {
+            .header-text h1 {
                 font-size: 18px;
             }
 
@@ -221,25 +226,32 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Plain Text Converter</h1>
-            <div class="subtitle">Remove formatting, clean text instantly</div>
+            <div class="header-text">
+                <h1>Plain Text Converter</h1>
+                <div class="subtitle">Remove formatting from text for easy pasting between systems</div>
+            </div>
+            <button class="header-button" onclick="clearText()">Clear All</button>
         </div>
 
         <div class="content">
             <div class="textarea-wrapper">
                 <label class="textarea-label">Input</label>
                 <textarea id="inputText" placeholder="Paste your formatted text here..."></textarea>
-                <div class="char-count" id="inputCount">0 characters</div>
+                <div class="text-stats">
+                    <span class="word-count" id="inputWords">0 words</span>
+                    <span class="separator">|</span>
+                    <span id="inputCount">0 characters</span>
+                </div>
             </div>
 
             <div class="textarea-wrapper">
                 <label class="textarea-label">Output (Click to Copy)</label>
                 <textarea id="plainText" placeholder="Plain text will appear here..." readonly></textarea>
-                <div class="char-count" id="outputCount">0 characters</div>
-            </div>
-
-            <div class="button-group">
-                <button onclick="clearText()">Clear All</button>
+                <div class="text-stats">
+                    <span class="word-count" id="outputWords">0 words</span>
+                    <span class="separator">|</span>
+                    <span id="outputCount">0 characters</span>
+                </div>
             </div>
         </div>
     </div>
@@ -255,7 +267,16 @@
         const plainText = document.getElementById('plainText');
         const inputCount = document.getElementById('inputCount');
         const outputCount = document.getElementById('outputCount');
+        const inputWords = document.getElementById('inputWords');
+        const outputWords = document.getElementById('outputWords');
         const toast = document.getElementById('toast');
+
+        // Count words in text
+        function countWords(text) {
+            const trimmed = text.trim();
+            if (trimmed.length === 0) return 0;
+            return trimmed.split(/\s+/).length;
+        }
 
         // Convert text on input
         inputText.addEventListener('input', function() {
@@ -270,8 +291,8 @@
             // Update output
             plainText.value = text;
             
-            // Update character counts
-            updateCharCounts();
+            // Update counts
+            updateCounts();
             
             // Auto-select output if there's content
             if (text.trim().length > 0) {
@@ -317,14 +338,16 @@
         function clearText() {
             inputText.value = '';
             plainText.value = '';
-            updateCharCounts();
+            updateCounts();
             inputText.focus();
         }
 
-        // Update character counts
-        function updateCharCounts() {
+        // Update word and character counts
+        function updateCounts() {
             inputCount.textContent = `${inputText.value.length} characters`;
             outputCount.textContent = `${plainText.value.length} characters`;
+            inputWords.textContent = `${countWords(inputText.value)} words`;
+            outputWords.textContent = `${countWords(plainText.value)} words`;
         }
 
         // Keyboard shortcut: Ctrl/Cmd + K to clear
@@ -336,7 +359,7 @@
         });
 
         // Initialize
-        updateCharCounts();
+        updateCounts();
         inputText.focus();
     </script>
 </body>
